@@ -1,41 +1,110 @@
-patch=1,EE,00118BEC,word,0803FFC6
-patch=1,EE,00118BF0,word,00000000
-patch=1,EE,000FFF18,word,3C1A000F
-patch=1,EE,000FFF1C,word,375AFEE0
-patch=1,EE,000FFF20,word,8F5B0000
-patch=1,EE,000FFF24,word,0365D826
-patch=1,EE,000FFF28,word,0367D826
-patch=1,EE,000FFF2C,word,3C0141C6
-patch=1,EE,000FFF30,word,34214E6D
-patch=1,EE,000FFF34,word,03610019
-patch=1,EE,000FFF38,word,0000D812
-patch=1,EE,000FFF3C,word,277B3039
-patch=1,EE,000FFF40,word,AF5B0000
-patch=1,EE,000FFF44,word,3C010057
-patch=1,EE,000FFF48,word,3421E4F0
-patch=1,EE,000FFF4C,word,14E10007
-patch=1,EE,000FFF50,word,00000000
-patch=1,EE,000FFF54,word,001B1C02
-patch=1,EE,000FFF58,word,24010018
-patch=1,EE,000FFF5C,word,0061001B
-patch=1,EE,000FFF60,word,00000000
-patch=1,EE,000FFF64,word,00001810
-patch=1,EE,000FFF68,word,AF430004
-patch=1,EE,000FFF6C,word,7CE30000
-patch=1,EE,000FFF70,word,24E70010
-patch=1,EE,000FFF74,word,080462FD
-patch=1,EE,000FFF78,word,00000000
-patch=1,EE,001BAEA0,word,0803FF8D
-patch=1,EE,001BAEA4,word,00000000
-patch=1,EE,000FFE34,word,26010012
-patch=1,EE,000FFE38,word,3C1A005A
-patch=1,EE,000FFE3C,word,375A03A2
-patch=1,EE,000FFE40,word,143A0004
-patch=1,EE,000FFE44,word,00000000
-patch=1,EE,000FFE48,word,3C1A000F
-patch=1,EE,000FFE4C,word,375AFEE4
-patch=1,EE,000FFE50,word,8F420000
-patch=1,EE,000FFE54,word,A6020012
-patch=1,EE,000FFE58,word,86030012 
-patch=1,EE,000FFE5C,word,0806EBA9
-patch=1,EE,000FFE60,word,00000000 
+[P1 Character Randomizer]
+author=Roxas [LifewasterMe] & Nighlin
+description=Randomize Player 1's character in any mode.
+// =====================================================
+// RNG hook
+// =====================================================
+
+patch=1,EE,00118BEC,word,0803FFC6 // j 000FFF18
+patch=1,EE,00118BF0,word,00000000 // nop
+patch=1,EE,000FFF18,word,3C1A000F // lui   k0,0x000F
+patch=1,EE,000FFF1C,word,375AFEE0 // ori   k0,k0,0xFEE0
+patch=1,EE,000FFF20,word,8F5B0000 // lw    k1,0x0(k0)
+patch=1,EE,000FFF24,word,0365D826 // xor   k1,k1,a1
+patch=1,EE,000FFF28,word,0367D826 // xor   k1,k1,a3
+patch=1,EE,000FFF2C,word,3C0141C6 // lui   at,0x41C6
+patch=1,EE,000FFF30,word,34214E6D // ori   at,at,0x4E6D
+patch=1,EE,000FFF34,word,03610019 // multu k1,at
+patch=1,EE,000FFF38,word,0000D812 // mflo  k1
+patch=1,EE,000FFF3C,word,277B3039 // addiu k1,k1,0x3039
+patch=1,EE,000FFF40,word,AF5B0000 // sw    k1,0x0(k0)
+patch=1,EE,000FFF44,word,3C010057 // lui   at,0x0057
+patch=1,EE,000FFF48,word,3421E4F0 // ori   at,at,0xE4F0
+patch=1,EE,000FFF4C,word,14E1001C // bne   a3,at,normal_store
+patch=1,EE,000FFF50,word,00000000 // nop
+patch=1,EE,000FFF54,word,001B1C02 // srl   v1,k1,0x10
+patch=1,EE,000FFF58,word,24010019 // addiu at,zero,0x19
+patch=1,EE,000FFF5C,word,0061001B // divu  v1,at
+patch=1,EE,000FFF60,word,00000000 // nop
+patch=1,EE,000FFF64,word,00001810 // mfhi  v1 ; random 0-24
+patch=1,EE,000FFF68,word,AF430004 // sw    v1,0x4(k0)
+patch=1,EE,000FFF6C,word,240200CD // addiu v0,zero,0xCD
+patch=1,EE,000FFF70,word,24010018 // addiu at,zero,0x18
+patch=1,EE,000FFF74,word,10610007 // beq   v1,at,set_cb
+patch=1,EE,000FFF78,word,00000000 // nop
+patch=1,EE,000FFF7C,word,2C610016 // sltiu at,v1,0x16
+patch=1,EE,000FFF80,word,10200005 // beq   at,zero,after_capsule_calc
+patch=1,EE,000FFF84,word,00000000 // nop
+patch=1,EE,000FFF88,word,00431021 // addu  v0,v0,v1
+patch=1,EE,000FFF8C,word,10000002 // beq   zero,zero,after_capsule_calc
+patch=1,EE,000FFF90,word,00000000 // nop
+
+// set_cb:
+patch=1,EE,000FFF94,word,240200CB // addiu v0,zero,0xCB
+
+// after_capsule_calc:
+patch=1,EE,000FFF98,word,24630100 // addiu v1,v1,0x100
+patch=1,EE,000FFF9C,word,7CE30000 // sq    v1,0x0(a3)
+patch=1,EE,000FFFA0,word,24010006 // addiu at,zero,0x06
+patch=1,EE,000FFFA4,word,A0E1000E // sb    at,0x0E(a3)
+patch=1,EE,000FFFA8,word,2741FFE0 // addiu at,k0,-0x20 ; at = 000FFEC0
+patch=1,EE,000FFFAC,word,7C200000 // sq    zero,0x0(at)
+patch=1,EE,000FFFB0,word,A0220000 // sb    v0,0x0(at)
+patch=1,EE,000FFFB4,word,24E70010 // addiu a3,a3,0x10
+patch=1,EE,000FFFB8,word,080462FD // j     00118BF4
+patch=1,EE,000FFFBC,word,00000000 // nop
+
+// normal_store:
+patch=1,EE,000FFFC0,word,7CE30000 // sq    v1,0x0(a3)
+patch=1,EE,000FFFC4,word,24E70010 // addiu a3,a3,0x10
+patch=1,EE,000FFFC8,word,080462FD // j     00118BF4
+patch=1,EE,000FFFCC,word,00000000 // nop
+
+// =====================================================
+//  Character Portrait Hook
+// =====================================================
+
+patch=1,EE,001BAEA0,word,0803FF8D // j 000FFE34
+patch=1,EE,001BAF84,word,00000000 // nop
+patch=1,EE,000FFE34,word,26010012 // addiu at,s0,0x12
+patch=1,EE,000FFE38,word,3C1A005A // lui   k0,0x005A
+patch=1,EE,000FFE3C,word,375A03A2 // ori   k0,k0,0x03A2
+patch=1,EE,000FFE40,word,143A0004 // bne   at,k0,normal
+patch=1,EE,000FFE44,word,00000000 // nop
+patch=1,EE,000FFE48,word,3C1A000F // lui   k0,0x000F
+patch=1,EE,000FFE4C,word,375AFEE4 // ori   k0,k0,0xFEE4
+patch=1,EE,000FFE50,word,8F420000 // lw    v0,0x0(k0)
+
+// normal:
+patch=1,EE,000FFE54,word,A6020012 // sh    v0,0x12(s0)
+patch=1,EE,000FFE58,word,86030012 // lh    v1,0x12(s0)
+patch=1,EE,000FFE5C,word,0806EBA9 // j     001BAEA4
+patch=1,EE,000FFE60,word,00000000 // nop
+
+[P1CR Breakthrough Modifier]
+author=Roxas [LifewasterMe] & Nighlin
+description=Enable each character's breakthrough capsule in the P1 Character Randomizer
+
+// =====================================================
+// Capsule Hook
+// =====================================================
+
+patch=1,EE,00118BF4,word,0803FF9C // j 000FFE70
+patch=1,EE,00118BF8,word,00000000 // nop
+patch=1,EE,000FFE70,word,3C010057 // lui   at,0x0057
+patch=1,EE,000FFE74,word,3421E500 // ori   at,at,0xE500
+patch=1,EE,000FFE78,word,14E10006 // bne   a3,at,normal_lq
+patch=1,EE,000FFE7C,word,00000000 // nop
+patch=1,EE,000FFE80,word,3C01000F // lui   at,0x000F
+patch=1,EE,000FFE84,word,3421FEC0 // ori   at,at,0xFEC0
+patch=1,EE,000FFE88,word,78220000 // lq    v0,0x0(at)
+patch=1,EE,000FFE8C,word,10000002 // beq   zero,zero,continue
+patch=1,EE,000FFE90,word,00000000 // nop
+
+// normal_lq:
+patch=1,EE,000FFE94,word,78A20000 // lq    v0,0x0(a1)
+
+// continue:
+patch=1,EE,000FFE98,word,24A50010 // addiu a1,a1,0x10
+patch=1,EE,000FFE9C,word,080462FF // j     00118BFC
+patch=1,EE,000FFEA0,word,00000000 // nop
