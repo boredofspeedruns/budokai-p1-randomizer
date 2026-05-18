@@ -30,7 +30,7 @@ patch=1,EE,000FFF64,word,00001810 // mfhi  v1 ; random 0-24
 patch=1,EE,000FFF68,word,AF430004 // sw    v1,0x4(k0)
 patch=1,EE,000FFF6C,word,240200CD // addiu v0,zero,0xCD
 patch=1,EE,000FFF70,word,24010018 // addiu at,zero,0x18
-patch=1,EE,000FFF74,word,10610007 // beq   v1,at,set_cb
+patch=1,EE,000FFF74,word,10610007 // beq   v1,at,set_e3
 patch=1,EE,000FFF78,word,00000000 // nop
 patch=1,EE,000FFF7C,word,2C610016 // sltiu at,v1,0x16
 patch=1,EE,000FFF80,word,10200005 // beq   at,zero,after_capsule_calc
@@ -39,8 +39,8 @@ patch=1,EE,000FFF88,word,00431021 // addu  v0,v0,v1
 patch=1,EE,000FFF8C,word,10000002 // beq   zero,zero,after_capsule_calc
 patch=1,EE,000FFF90,word,00000000 // nop
 
-// set_cb:
-patch=1,EE,000FFF94,word,240200CB // addiu v0,zero,0xCB
+// set_e3:
+patch=1,EE,000FFF94,word,240200E3 // addiu v0,zero,0xE3
 
 // after_capsule_calc:
 patch=1,EE,000FFF98,word,24630100 // addiu v1,v1,0x100
